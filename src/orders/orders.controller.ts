@@ -1,10 +1,21 @@
-import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { Controller, Logger } from '@nestjs/common';
+import {
+  EventPattern,
+  MessagePattern,
+  Payload,
+  RpcException,
+} from '@nestjs/microservices';
 import { OrdersService } from './orders.service';
-import { CreateOrderDto, PaginationOrdersDto, StatusOrderDto } from './dto';
+import {
+  CreateOrderDto,
+  PaginationOrdersDto,
+  PaidOrderDto,
+  StatusOrderDto,
+} from './dto';
 
 @Controller()
 export class OrdersController {
+  private logger = new Logger('orders.controller.ts');
   constructor(private readonly ordersService: OrdersService) {}
 
   @MessagePattern('createOrder')
@@ -37,5 +48,12 @@ export class OrdersController {
   changeOrderStatus(@Payload() updateOrderDto: StatusOrderDto) {
     return this.ordersService.changeOrderStatus(updateOrderDto);
     // return this.ordersService.changeOrderStatus(updateOrderDto);
+  }
+
+  @EventPattern('order.payment.succed')
+  paidOrder(@Payload() paidOrderDto: PaidOrderDto) {
+    console.log(paidOrderDto);
+    this.logger.debug('En el metodo de paidOrder');
+    return this.ordersService.paidOrder(paidOrderDto);
   }
 }
