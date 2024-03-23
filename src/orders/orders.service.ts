@@ -134,6 +134,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
       orderItems: order.orderItems.map((item: any) => ({
         ...item,
         name: products.find((product) => product.id === item.productId).name,
+        subir: 'prueba subir',
       })),
     };
   }
