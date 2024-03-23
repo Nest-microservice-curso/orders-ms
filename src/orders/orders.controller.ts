@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto, PaginationOrdersDto, StatusOrderDto } from './dto';
 
@@ -8,8 +8,19 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @MessagePattern('createOrder')
-  create(@Payload() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
+  async create(@Payload() createOrderDto: CreateOrderDto) {
+    try {
+      const order = await this.ordersService.create(createOrderDto);
+      const paymentSession =
+        await this.ordersService.createPaymentSession(order);
+
+      return {
+        order,
+        paymentSession,
+      };
+    } catch (error) {
+      throw new RpcException(error);
+    }
   }
 
   @MessagePattern('findAllOrders')

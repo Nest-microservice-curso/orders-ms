@@ -12,14 +12,13 @@ import { PaginationOrdersDto } from './dto/pagination-orders-dto';
 import { StatusOrderDto } from './dto';
 import { catchError, firstValueFrom } from 'rxjs';
 import { NATS_SERVICES } from 'src/config';
+import { OrderWithProducts } from './interfaces/order-with-produts.interface';
 
 @Injectable()
 export class OrdersService extends PrismaClient implements OnModuleInit {
   private readonly logger = new Logger('OrdersService');
 
-  constructor(
-    @Inject(NATS_SERVICES) private readonly productService: ClientProxy,
-  ) {
+  constructor(@Inject(NATS_SERVICES) private readonly client: ClientProxy) {
     super();
   }
 
@@ -142,7 +141,7 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
   private getItemsByOrderId(productIds: number[]): Promise<any> {
     try {
       return firstValueFrom(
-        this.productService.send({ cmd: 'validate-product' }, productIds).pipe(
+        this.client.send({ cmd: 'validate-product' }, productIds).pipe(
           catchError((error) => {
             this.logger.error(error);
             throw new RpcException(error);
@@ -166,5 +165,21 @@ export class OrdersService extends PrismaClient implements OnModuleInit {
       },
       data: data,
     });
+  }
+
+  async createPaymentSession(order: OrderWithProducts) {
+    const paymentSession = await firstValueFrom(
+      this.client.send('create.payment.session', {
+        orderId: order.id,
+        currency: 'usd',
+        items: order.orderItems.map((item: any) => ({
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+        })),
+      }),
+    );
+
+    return paymentSession;
   }
 }
