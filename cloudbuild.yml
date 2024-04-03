@@ -1,0 +1,18 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'build',
+        '-t',
+        'northamerica-northeast2-docker.pkg.dev/microservice-produc-back/image-registra/orders-ms-prod',
+        '-f',
+        'Dockerfile.prod',
+        '--platform=linux/amd64',
+        '.',
+      ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'push',
+        'northamerica-northeast2-docker.pkg.dev/microservice-produc-back/image-registra/orders-ms-prod',
+      ]
