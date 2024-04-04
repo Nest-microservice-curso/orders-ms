@@ -4,7 +4,7 @@ steps:
     args:
       - -c
       - |
-        docker build -t northamerica-northeast2-docker.pkg.dev/microservice-produc-back/image-registra/orders-ms-prod -f Dockerfile.prod --platform=linux/amd64 --build-arg ORDERS_MS_DATABASE_URL=$$DATABASE_URL .
+        docker build -t northamerica-northeast2-docker.pkg.dev/microservice-produc-back/image-registra/orders-ms-prod -f Dockerfile.prod --platform=linux/amd64 --build-arg orders_ms_database_url=$$DATABASE_URL .
     secretEnv: ['DATABASE_URL']
 
   - name: 'gcr.io/cloud-builders/docker'
